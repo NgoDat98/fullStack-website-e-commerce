@@ -45,11 +45,18 @@ const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const roomChatRoutes = require("./routes/roomChat");
 
+// app.use(bodyParser.json());
+// app.use(bodyParser({limit: '5mb'}));
 app.use(express.json());
+app.use(express({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).array("image", 5)
+  multer({
+    storage: fileStorage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 100000000 },
+  }).array("image", 5)
 );
 
 const cors = require("cors");
