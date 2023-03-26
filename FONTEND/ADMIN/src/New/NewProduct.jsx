@@ -68,38 +68,44 @@ const NewProduct = () => {
 
       const fetchData = async () => {
         try {
-          fetch(url, {
+          const res = await fetch(url, {
             method: "POST",
             body: formData,
           });
+
+          const data = await res.json();
+          console.log(res);
+          if (data.message === "Add New Product Success!!") {
+            console.log("thêm sản phẩm thành công");
+            Swal.fire({
+              title: "Success!",
+              text: "Do you want to go to the product list?",
+              icon: "success",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Yes, go to Product!",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.replace("/products");
+              }
+            });
+
+            setProductName("");
+            setCategory("");
+            setLong_desc("");
+            setShort_desc("");
+            setProductPrice("");
+            setProductCount("");
+            setImages([]);
+          }
         } catch (err) {
           console.log(err);
         }
       };
       fetchData();
 
-      Swal.fire({
-        title: "Success!",
-        text: "Do you want to go to the product list?",
-        icon: "success",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, go to Product!",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.replace("/products");
-        }
-      });
-
       setCheckdata(true);
-      setProductName("");
-      setCategory("");
-      setLong_desc("");
-      setShort_desc("");
-      setProductPrice("");
-      setProductCount("");
-      setImages([]);
     } else {
       setCheckdata(false);
       Swal.fire({
@@ -151,38 +157,51 @@ const NewProduct = () => {
 
       const fetchData = async () => {
         try {
-          fetch(url, {
+          const res = await fetch(url, {
             method: "POST",
             body: formData,
           });
+          const data = await res.json();
+          if (data.message === "Product updated successful!!") {
+            let timerInterval;
+            Swal.fire({
+              title: "Product update is in progress!!",
+              html: "I will close in <b></b> milliseconds.",
+              timer: 2000,
+              timerProgressBar: true,
+              didOpen: () => {
+                Swal.showLoading();
+                const b = Swal.getHtmlContainer().querySelector("b");
+                timerInterval = setInterval(() => {
+                  b.textContent = Swal.getTimerLeft();
+                }, 100);
+              },
+              willClose: () => {
+                clearInterval(timerInterval);
+              },
+            }).then((result) => {
+              /* Read more about handling dismissals below */
+              if (result.dismiss === Swal.DismissReason.timer) {
+                window.location.replace("/products");
+              }
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Lỗi!! Không thể cập nhật lại sản phẩm",
+              text: "Bạn vui lòng kiểm tra lại thoong tin sản phẩm hoặc liên hệ bảo trì web để được hỗ trợ!",
+            });
+          }
         } catch (err) {
-          console.log(err);
+          if (err)
+            Swal.fire({
+              icon: "error",
+              title: "Lỗi!! Không thể cập nhật lại sản phẩm",
+              text: "Bạn vui lòng kiểm tra lại đường truyền mạng hoặc liên hệ bảo trì web để được hỗ trợ!",
+            });
         }
       };
       fetchData();
-
-      let timerInterval;
-      Swal.fire({
-        title: "Product update is in progress!!",
-        html: "I will close in <b></b> milliseconds.",
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => {
-          Swal.showLoading();
-          const b = Swal.getHtmlContainer().querySelector("b");
-          timerInterval = setInterval(() => {
-            b.textContent = Swal.getTimerLeft();
-          }, 100);
-        },
-        willClose: () => {
-          clearInterval(timerInterval);
-        },
-      }).then((result) => {
-        /* Read more about handling dismissals below */
-        if (result.dismiss === Swal.DismissReason.timer) {
-          window.location.replace("/products");
-        }
-      });
 
       setCheckdata(true);
     } else {
@@ -202,7 +221,9 @@ const NewProduct = () => {
   const short_descErr = !checkdata && !short_desc;
   const priceErr = !checkdata && !productPrice;
   const countErr = !checkdata && !productCount;
-  const imagesErr = !checkdata && images.length !== 5;
+  const imagesErr = checkEdit
+    ? images.length > 0 && !checkdata && images.length !== 5
+    : !checkdata && images.length !== 5;
 
   return (
     <div className="page-wrapper">

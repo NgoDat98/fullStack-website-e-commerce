@@ -1,16 +1,17 @@
 const nodemailer = require("nodemailer");
 const sendfridTransport = require("nodemailer-sendgrid-transport");
 // const sgMail = require("@sendgrid/mail");
+require("dotenv").config();
 
 const Product = require("../models/product");
 const Order = require("../models/order");
 const User = require("../models/user");
 
+// API key sendgrid bị lỗi
 const transporter = nodemailer.createTransport(
   sendfridTransport({
     auth: {
-      api_key:
-        "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",
+      api_key: process.env.SENDGIRD_API_KEY,
     },
   })
 );
@@ -23,9 +24,11 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.query.prodId;
   Product.findById(prodId)
     .then((product) => {
-      res.json(product);
+      res.status(200).json(product);
     })
-    .catch((err) => console.log(err));
+    .catch((err) =>
+      res.status(500).json({ message: "Server is not responding!!" })
+    );
 };
 
 exports.getIndex = (req, res, next) => {
@@ -74,20 +77,12 @@ exports.postOrder = (req, res, next) => {
         .then((result) => {
           return user.clearCart();
         })
+        .then((updated) => {
+          return res.status(200).json({
+            message: "Add order to order and update cart successfully!! ",
+          });
+        })
         .catch((err) => console.log(err));
-    })
-    .catch((err) => console.log(err));
-};
-
-exports.getOrders = (req, res, next) => {
-  Order.find({ "user.userId": req.user._id })
-    .then((orders) => {
-      res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
-        orders: orders,
-        isAuthenticated: req.session.isLoggedIn,
-      });
     })
     .catch((err) => console.log(err));
 };
@@ -182,27 +177,15 @@ exports.sendEmail = (req, res, next) => {
           },
           function (err, info) {
             if (err) {
-              console.log("Email Not Sent!");
-            } else {
-              console.log("Email Sent Success!");
+              console.log(err, "err");
+              return res.status(200).json({ message: "err" });
+            }
+            if (info) {
+              console.log(info, "info");
+              return res.status(200).json(info);
             }
           }
         );
-        // return sgMail.send(
-        //   {
-        //     to: email,
-        //     from: "ngodat0410@gmail.com",
-        //     subject: "Order Success!",
-        //     text: "Thanh you!",
-        //   },
-        //   function (err, info) {
-        //     if (err) {
-        //       console.log("Email Not Sent!");
-        //     } else {
-        //       console.log("Email Sent Success!");
-        //     }
-        //   }
-        // );
       }
     })
     .catch((err) => {
@@ -226,6 +209,21 @@ exports.getDetailOerder = (req, res, next) => {
   Order.findById(orderId)
     .then((order) => {
       res.status(200).json(order);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+exports.checkCount = (req, res, next) => {
+  const prodId = req.query.prodId;
+  Product.findById(prodId)
+    .then((product) => {
+      if (product.count > 0) {
+        return res.status(200).json({ count: true });
+      } else {
+        return res.status(200).json({ count: false });
+      }
     })
     .catch((err) => {
       console.log(err);

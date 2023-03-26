@@ -4,9 +4,10 @@ import CartAPI from "../API/CartAPI";
 import CheckoutAPI from "../API/CheckoutAPI";
 import convertMoney from "../convertMoney";
 import "./Checkout.css";
-
 import io from "socket.io-client";
 import axios from "axios";
+import Swal from "sweetalert2";
+
 const socket = io("http://localhost:5000");
 
 function Checkout(props) {
@@ -130,7 +131,7 @@ function Checkout(props) {
               setPhoneError(false);
               setAddressError(true);
             } else {
-              console.log("Thanh Cong");
+              console.log("đang tiến hành thêm sản phẩm vào đơn hàng");
 
               const addOrderDB = async (
                 userId,
@@ -167,7 +168,24 @@ function Checkout(props) {
                   }
                 );
 
-                console.log(response);
+                if (response) {
+                  Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Đặt đơn hàng thành công",
+                    showConfirmButton: false,
+                    timer: 3000,
+                  });
+                  setLoad(true);
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Lỗi! Không đặt được đơn hàng",
+                    text: "Đã xảy ra sự cố, không thể thực hiện đặt Hàng.   Vui lòng xem lại thông tìn đơn hàng hoặc liên hệ tư vấn viên để được hỗ trợ.",
+                    // footer:
+                    //   '<a href="">Bạn có muốn liên hệ với tư vấn viên?</a>',
+                  });
+                }
               };
 
               addOrderDB(
@@ -179,8 +197,6 @@ function Checkout(props) {
                 email,
                 new Date()
               );
-
-              setLoad(!load);
             }
           }
         }
@@ -204,7 +220,21 @@ function Checkout(props) {
           };
           const response = await CheckoutAPI.postEmail(params);
 
-          console.log(response);
+          if (response.message === "success") {
+            setTimeout(() => {
+              setSuccess(true);
+              setLoad(false);
+            }, 3000);
+          } else {
+            setLoad(false);
+            Swal.fire({
+              icon: "error",
+              title: "Lỗi! Không gửi được Email",
+              text: "Đã xảy ra sự cố, không thể gửi được Email. Bạn vui lòng kiểm tra lại thông tin liên hệ hoặc liên hệ với tư vấn viên để được hỗ trợ.",
+              // footer:
+              //   '<a href="">Bạn có muốn liên hệ với tư vấn viên?</a>',
+            });
+          }
         } catch (err) {
           console.log(err);
         }
@@ -216,13 +246,6 @@ function Checkout(props) {
 
       // Gửi socket lên server
       socket.emit("send_order", data);
-
-      //Dùng setTimeout delay 3s
-      //Sau 4s nó sẽ thực hiện
-      setTimeout(() => {
-        setSuccess(!success);
-        setLoad(!load);
-      }, 4000);
     }
   }, [load]);
 
@@ -253,6 +276,9 @@ function Checkout(props) {
       {load && (
         <div className="wrapper_loader">
           <div className="loader"></div>
+          <h3 className="textloader">
+            Đang tiến hành lấy dữ liệu và gửi hóa đơn vào hộp thư của bạn!
+          </h3>
         </div>
       )}
 

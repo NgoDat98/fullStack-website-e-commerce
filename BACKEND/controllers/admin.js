@@ -107,7 +107,12 @@ exports.postNewProduct = (req, res, next) => {
       img4: `http://localhost:5000/${imageUrl[3].path}`,
       img5: `http://localhost:5000/${imageUrl[4].path}`,
     });
-    return product.save();
+    return product.save(function (err) {
+      if (!err) {
+        console.log("ok");
+        return res.status(200).json({ message: "Add New Product Success!!" });
+      }
+    });
   } else {
     res.status(400).send("Invalid data information!");
   }
@@ -142,7 +147,7 @@ exports.postUpdateProduct = (req, res, next) => {
       return product.save();
     })
     .then((results) => {
-      console.log("Update Success!");
+      return res.status(200).json({ message: "Product updated successful!!" });
     })
     .catch((err) => {
       console.log(err);
@@ -153,8 +158,12 @@ exports.postDeleteProduct = (req, res, next) => {
   const proId = req.body.productId;
 
   Product.findByIdAndRemove(proId)
-    .then((results) => {
-      console.log("Delete Prouct!!");
+    .then((deleted) => {
+      if (deleted) {
+        return res
+          .status(200)
+          .json({ message: "Product deleted successfully!" });
+      }
     })
     .catch((err) => {
       console.log(err);

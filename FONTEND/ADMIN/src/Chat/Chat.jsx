@@ -59,7 +59,7 @@ function Chat(props) {
       //Sau đó nó sẽ setLoad gọi lại hàm useEffect lấy lại dữ liệu
       setLoad(true);
     });
-  }, [socket]);
+  }, []);
 
   // Hàm này dùng để gửi tin nhắn cho khách hàng
   const handlerSend = () => {
@@ -139,7 +139,7 @@ function Chat(props) {
                   >
                     <ul className="mailbox list-style-none">
                       <li>
-                        <div className="message-center">
+                        <div className="message-center scroll">
                           {allRoom &&
                             allRoom.map((value) => (
                               <a

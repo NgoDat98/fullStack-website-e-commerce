@@ -51,7 +51,9 @@ const Login = () => {
                 withCredentials: true,
               }
             );
+
             const data = await res.data;
+            console.log(data);
             if (!data.isLogin) {
               data.message === "Account does not exist!" && setEmailErr(true);
               data.message === "account information password is not correct!" &&

@@ -7,6 +7,8 @@ import { Link, Redirect } from "react-router-dom";
 import CartAPI from "../API/CartAPI";
 import queryString from "query-string";
 import convertMoney from "../convertMoney";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 function Cart(props) {
   //id_user được lấy từ redux
@@ -56,9 +58,6 @@ function Cart(props) {
     setTotal(sub_total);
   }
 
-  if (loadAPI) {
-    window.location.reload();
-  }
   //Hàm này dùng để load dữ liệu từ API
   //Khi người dùng đã đăng nhập
   useEffect(() => {
@@ -108,16 +107,38 @@ function Cart(props) {
         };
 
         const response = await CartAPI.deleteToCart(params);
-        console.log(response);
+
+        if (response) {
+          let timerInterval;
+          Swal.fire({
+            title: "Adding products to cart!!",
+            html: "Add product successfully after <b></b> milliseconds.",
+            timer: 1000,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+              const b = Swal.getHtmlContainer().querySelector("b");
+              timerInterval = setInterval(() => {
+                b.textContent = Swal.getTimerLeft();
+              }, 100);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            },
+          }).then((result) => {
+            //Sau đó thay đổi state loadAPI và load lại hàm useEffect
+            setLoadAPI(true);
+            alertify.set("notifier", "position", "bottom-left");
+            alertify.error("Bạn Đã Xóa Hàng Thành Công!");
+            /* Read more about handling dismissals below */
+            if (result.dismiss === Swal.DismissReason.timer) {
+              console.log("I was closed by the timer");
+            }
+          });
+        }
       };
 
       fetchDelete();
-
-      //Sau đó thay đổi state loadAPI và load lại hàm useEffect
-      setLoadAPI(true);
-
-      alertify.set("notifier", "position", "bottom-left");
-      alertify.error("Bạn Đã Xóa Hàng Thành Công!");
     } else {
       // user chưa đăng nhập
 
@@ -168,18 +189,39 @@ function Cart(props) {
         const query = "?" + queryString.stringify(params);
 
         const response = await CartAPI.putToCart(query);
-        console.log(response);
+        if (response) {
+          let timerInterval;
+          Swal.fire({
+            title: "Updated products in cart!!",
+            html: "Update product successfully after <b></b> milliseconds.",
+            timer: 1000,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+              const b = Swal.getHtmlContainer().querySelector("b");
+              timerInterval = setInterval(() => {
+                b.textContent = Swal.getTimerLeft();
+              }, 100);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            },
+          }).then((result) => {
+            //Sau đó thay đổi state loadAPI và load lại hàm useEffect
+            setLoadAPI(true);
+            alertify.set("notifier", "position", "bottom-left");
+            alertify.success("Bạn Đã Sửa Hàng Thành Công!");
+            /* Read more about handling dismissals below */
+            if (result.dismiss === Swal.DismissReason.timer) {
+              console.log("I was closed by the timer");
+            }
+          });
+        }
       };
 
       fetchPut();
 
-      //Sau đó thay đổi state loadAPI và load lại hàm useEffect
-      setLoadAPI(true);
-
       console.log("Ban Da Dang Nhap!");
-
-      alertify.set("notifier", "position", "bottom-left");
-      alertify.success("Bạn Đã Sửa Hàng Thành Công!");
     } else {
       //Nếu không có phiên làm việc của Session User thì mình sẽ xử lý với Redux
       const data = {

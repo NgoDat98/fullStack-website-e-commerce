@@ -51,9 +51,12 @@ exports.postCart = (req, res, next) => {
         .then((prod) => {
           user.addToCart(prod, count);
           prod.count = prod.count - count;
-          prod.save((err) => {
+          return prod.save((err) => {
             console.log(err);
           });
+        })
+        .then((test) => {
+          return res.status(200).json({ message: "Add to cart success!!" });
         })
         .catch((err) => {
           console.log(err);
@@ -83,6 +86,12 @@ exports.updatedCart = (req, res, next) => {
             prod.save();
           }
         })
+        .then((update) => {
+          return res.status(200).json({
+            message:
+              "The product in the cart has been successfully updated!!!!",
+          });
+        })
         .catch((err) => {
           console.log(err);
         });
@@ -102,9 +111,14 @@ exports.postCartDeletedProduct = (req, res, next) => {
         .then((prod) => {
           user.removeFromCart(prod);
           prod.count = prod.count + count;
-          prod.save((err) => {
+          return prod.save((err) => {
             console.log(err);
           });
+        })
+        .then((deleted) => {
+          return res
+            .status(200)
+            .json({ message: "Product removed from cart Successful!!" });
         })
         .catch((err) => {
           console.log(err);

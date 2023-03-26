@@ -20,8 +20,13 @@ exports.getMessageByRoomChatId = (req, res, next) => {
 exports.postCreatedNewRoom = (req, res, next) => {
   const roomChat = new RoomChat({ content: [] });
   try {
-    roomChat.save();
-    res.status(201).json(roomChat);
+    return roomChat.save(function (err) {
+      if (err) {
+        return res.status(503);
+      } else {
+        return res.status(201).json(roomChat);
+      }
+    });
   } catch (err) {
     console.log(err);
   }

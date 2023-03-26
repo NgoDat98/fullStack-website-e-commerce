@@ -1,8 +1,15 @@
 .active_user {
-	cursor: pointer !important;
+  cursor: pointer !important;
 }
 
 .active_user:hover {
-	color: rgb(92, 92, 253) !important;
-	transition: all 0.5s ease-in-out;
+  color: rgb(92, 92, 253) !important;
+  transition: all 0.5s ease-in-out;
+}
+
+.scroll {
+  display: block;
+  overflow-x: hidden;
+  max-height: 400px;
+  overflow-y: scroll;
 }

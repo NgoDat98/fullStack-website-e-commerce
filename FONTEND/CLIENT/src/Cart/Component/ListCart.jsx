@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import convertMoney from "../../convertMoney";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 ListCart.propTypes = {
   listCart: PropTypes.array,
@@ -45,15 +47,26 @@ function ListCart(props) {
     onUpdateCount(getIdUser, getIdProduct, updateCount, calculation);
   };
 
-  const handlerUp = (getIdUser, getIdProduct, getCount, calculation) => {
+  const handlerUp = async (getIdUser, getIdProduct, getCount, calculation) => {
     if (!onUpdateCount) {
       return;
     }
 
-    //Trước khi trả dữ liệu về component cha thì phải thay đổi biến count
-    const updateCount = parseInt(getCount) + 1;
+    const res = await axios.get(
+      `http://localhost:5000/shop/check-count?prodId=${getIdProduct}`
+    );
+    const data = await res.data;
 
-    onUpdateCount(getIdUser, getIdProduct, updateCount, calculation);
+    if (data.count) {
+      //Trước khi trả dữ liệu về component cha thì phải thay đổi biến count
+      const updateCount = parseInt(getCount) + 1;
+
+      onUpdateCount(getIdUser, getIdProduct, updateCount, calculation);
+    } else {
+      Swal.fire(
+        "Số lượng sản phẩm này trong kho đã hêt, bạn không thể tăng thêm!!"
+      );
+    }
   };
 
   return (

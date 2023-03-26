@@ -107,7 +107,7 @@ function Chat(props) {
       //Sau đó nó sẽ setLoad gọi lại hàm useEffect lấy lại dữ liệu
       setLoad(true);
     });
-  }, [socket]);
+  }, []);
 
   return (
     <div className="wrapper_chat">

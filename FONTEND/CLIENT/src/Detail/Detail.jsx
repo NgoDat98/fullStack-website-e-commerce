@@ -50,7 +50,7 @@ function Detail(props) {
         const res = await axios.get(
           `http://localhost:5000/shop/product?prodId=${id}`
         );
-        const data = res.data;
+        const data = await res.data;
         set_list_comment(data);
       } catch (err) {
         console.log(err);
@@ -134,7 +134,6 @@ function Detail(props) {
         console.log(err);
       }
     };
-
     fetchData();
   }, []);
 
@@ -167,7 +166,8 @@ function Detail(props) {
         const res = await axios.get(
           `http://localhost:5000/shop/product?prodId=${id}`
         );
-        const data = res.data;
+        const data = await res.data;
+
         setDetail(data);
         setLoad(true);
       } catch (err) {
@@ -215,21 +215,40 @@ function Detail(props) {
 
         const response = await CartAPI.postAddToCart(params);
 
-        console.log(response);
+        if (response) {
+          let timerInterval;
+          Swal.fire({
+            title: "Adding products to cart!!",
+            html: "Add product successfully after <b></b> milliseconds.",
+            timer: 1000,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+              const b = Swal.getHtmlContainer().querySelector("b");
+              timerInterval = setInterval(() => {
+                b.textContent = Swal.getTimerLeft();
+              }, 100);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            },
+          }).then((result) => {
+            setLoad(false);
+            alertify.set("notifier", "position", "bottom-left");
+            alertify.success("Bạn Đã Thêm Hàng Thành Công!");
+            /* Read more about handling dismissals below */
+            if (result.dismiss === Swal.DismissReason.timer) {
+              console.log("I was closed by the timer");
+            }
+          });
+        }
       };
 
       fetchPost();
-      setLoad(false);
-      setTimeout(() => {
-        setLoad(false);
-      }, 300);
     } else {
       const action = addCart(data);
       dispatch(action);
     }
-
-    alertify.set("notifier", "position", "bottom-left");
-    alertify.success("Bạn Đã Thêm Hàng Thành Công!");
   };
 
   // Thông báo cho khách hàng biết khi hết sản Phẩm
@@ -239,7 +258,7 @@ function Detail(props) {
         "This product is out of stock, please see other product information."
       );
     }
-  });
+  }, [detail]);
 
   return (
     <section className="py-5">

@@ -123,10 +123,9 @@ exports.loginAdmin = (req, res, next) => {
                 isLogin: false,
               });
             } else {
-              if (user.role === "admin" || "Counselors") {
+              if (user.role === "admin" || user.role === "counselors") {
                 req.session.isLogin = true;
                 req.session.user = user;
-                console.log("ngon!");
                 res.status(200).json({
                   message: "Success!",
                   isLogin: req.session.isLogin,

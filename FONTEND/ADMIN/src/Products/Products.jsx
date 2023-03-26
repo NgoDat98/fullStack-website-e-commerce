@@ -51,8 +51,8 @@ function Products(props) {
     });
   };
 
-  // //Gọi hàm useEffect tìm tổng số sản phẩm để tính tổng số trang
-  // //Và nó phụ thuộc và state pagination
+  //Gọi hàm useEffect tìm tổng số sản phẩm để tính tổng số trang
+  //Và nó phụ thuộc và state pagination
   // useEffect(() => {
   //   const fetchAllData = async () => {
   //     const response = await ProductAPI.getAPI();
@@ -89,6 +89,7 @@ function Products(props) {
 
         setProducts(response);
         setTotalPage(response.total_pages);
+        setDeleteLoad(false);
       } catch (err) {
         console.log(err);
       }
@@ -210,24 +211,45 @@ function Products(props) {
                                     confirmButtonText: "Yes, delete it!",
                                   })
                                     .then((result) => {
+                                      console.log(result);
                                       if (result.isConfirmed) {
-                                        axios.post(
-                                          "http://localhost:5000/admin/delete-product",
-                                          { productId: value._id }
-                                        );
-                                        setDeleteLoad(!deleteLoad);
-                                        return true;
+                                        const fetchDate = async () => {
+                                          try {
+                                            const res = await axios.post(
+                                              "http://localhost:5000/admin/delete-product",
+                                              { productId: value._id }
+                                            );
+                                            const data = await res.data;
+                                            if (
+                                              data.message ===
+                                              "Product deleted successfully!"
+                                            ) {
+                                              Swal.fire(
+                                                "Deleted!",
+                                                "Your file has been deleted.",
+                                                "success"
+                                              );
+                                              setDeleteLoad(true);
+                                            }
+                                          } catch (err) {
+                                            console.log(err);
+                                          }
+
+                                          // const data = await res.data;
+                                          // if (
+                                          //   data.message ===
+                                          //   "Product deleted successfully!"
+                                          // ) {
+
+                                          // }
+                                        };
+                                        fetchDate();
+                                      } else {
+                                        return { test: false };
                                       }
-                                      return false;
                                     })
-                                    .then((kq) => {
-                                      if (kq) {
-                                        Swal.fire(
-                                          "Deleted!",
-                                          "Your file has been deleted.",
-                                          "success"
-                                        );
-                                      }
+                                    .catch((err) => {
+                                      console.log(err);
                                     });
                                 }}
                               >

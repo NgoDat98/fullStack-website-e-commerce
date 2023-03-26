@@ -78,8 +78,6 @@ function Shop(props) {
     });
   };
 
-  console.log(pagination);
-
   //Gọi hàm useEffect tìm tổng số sản phẩm để tính tổng số trang
   //Và nó phụ thuộc và state pagination
   useEffect(() => {
@@ -89,8 +87,6 @@ function Shop(props) {
       const filterCategory = data.filter(
         (x) => x.category === pagination.category
       );
-
-      console.log(parseInt(data.length) / parseInt(pagination.count));
 
       // Nếu mà category === 'all' thì nó sẽ gọi hàm get tất cả sản phẩm
       // Ngược lại thì nó sẽ gọi hàm pagination và phân loại sản phẩm
